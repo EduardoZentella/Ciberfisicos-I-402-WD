@@ -14,6 +14,7 @@ HELP.md
 *.DS_Store
 *.crt.pem
 .vscode/
+.pio/
 
 # Target files
 Target/
