@@ -1,19 +1,19 @@
-# rutas/crud.py
+# Rutas/crud.py
 from flask import request, jsonify # Importar las librerías necesarias de Flask
-from App.application import app, db, get_first_level # Importar la aplicación de Flask y la instancia de Firebase
+from App.application import app, firebase_db, get_first_level # Importar la aplicación de Flask y la instancia de Firebase
 
 # Ruta para crear un nuevo recurso
 @app.route('/<path:path>', methods=['POST'])
 def create(path):
     data = request.json
-    ref = db.reference(f'/{path}')
+    ref = firebase_db.reference(f'/{path}')
     ref.push(data)
     return jsonify(data), 201
 
 # Ruta para obtener uno o todos los recursos
 @app.route('/<path:path>', methods=['GET'])
 def read(path):
-    ref = db.reference(f'/{path}')
+    ref = firebase_db.reference(f'/{path}')
     instances = ref.get()    
     if not instances:
         return jsonify({"error": "Recurso no encontrado"}), 404
@@ -25,7 +25,7 @@ def read(path):
 @app.route('/<path:path>', methods=['PUT'])
 def update(path):
     data = request.json
-    ref = db.reference(f'/{path}')
+    ref = firebase_db.reference(f'/{path}')
     instance = ref.get()
     if not instance:
         return jsonify({"error": "Recurso no encontrado"}), 404
@@ -35,7 +35,7 @@ def update(path):
 # Ruta para eliminar un recurso por ID
 @app.route('/<path:path>', methods=['DELETE'])
 def delete(path):
-    ref = db.reference(f'/{path}')
+    ref = firebase_db.reference(f'/{path}')
     instance = ref.get()
     if not instance:
         return jsonify({"error": "Recurso no encontrado"}), 404
