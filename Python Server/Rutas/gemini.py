@@ -41,7 +41,10 @@ def analyze_image():
     # Genera contenido usando la API de Gemini con el prompt y las imágenes
     # Convertir las imágenes a un formato adecuado para la API de Gemini
     files = [image for image in images]
-    response = model.generate_content([data.prompt] + files)
+    if len(files) > 1:
+        response = model.generate_content([data.prompt] + files)
+    else:
+        response = model.generate_content(files + [data.prompt])
     
     # Devuelve la respuesta de Gemini
     return jsonify({'text': response.text})
