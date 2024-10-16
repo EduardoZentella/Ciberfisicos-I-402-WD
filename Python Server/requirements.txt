@@ -1,0 +1,8 @@
+flask
+firebase-admin
+python-dotenv
+pydantic
+Pillow
+opencv-python
+numpy
+google-generativeai
