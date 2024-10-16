@@ -12,7 +12,7 @@ run:
   pre-run:
     - pip3 install pipenv
     - pipenv install --skip-lock --requirements requirements.txt
-  command: pipenv run python3 server.py
+  command: pipenv run python3 Server.py
   network:
     port: 8080
   secrets:
