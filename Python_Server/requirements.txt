@@ -1,6 +1,6 @@
-flask
+Flask
+waitress
 firebase-admin
-python-dotenv
 pydantic
 Pillow
 opencv-python

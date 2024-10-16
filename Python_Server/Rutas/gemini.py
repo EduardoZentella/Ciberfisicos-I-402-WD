@@ -7,8 +7,7 @@ from App.application import app, firebase_db, firebase_storage, get_first_level,
 import google.generativeai as genai # Importar la librería generativeai de Gemini
 import os # Importar la librería para interactuar con el sistema operativo
 from Models.models import ImageRequest, ContentRequest # Importar los modelos de Pydantic
-import cv2
-import numpy as np
+import numpy as np # Importar la librería para trabajar con arreglos multidimensionales
 
 # Configurar el modelo de Gemini
 genai.configure(api_key= os.getenv("GEMINI_API_KEY"))
@@ -33,9 +32,8 @@ def analyze_image():
         image_data = blob.download_as_string()
         arr = np.frombuffer(image_data, np.uint8)
         # Cargar la imagen en memoria
-        image = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-        image_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        image_pil.show()
+        image_bytes = BytesIO(arr)
+        image_pil = Image.open(image_bytes)
         images.append(image_pil)
     
     # Genera contenido usando la API de Gemini con el prompt y las imágenes
