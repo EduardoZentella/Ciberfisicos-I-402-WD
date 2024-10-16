@@ -15,7 +15,7 @@ run:
   command: pipenv run python3 server.py
   network:
     port: 8080
-  env:
+  secrets:
     - name: PROJECT_ID
       value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PROJECT_ID
     - name: PRIVATE_KEY_ID
