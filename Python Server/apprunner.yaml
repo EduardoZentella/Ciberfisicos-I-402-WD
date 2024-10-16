@@ -15,3 +15,20 @@ run:
   command: pipenv run python3 server.py
   network:
     port: 8080
+  env:
+    - name: PROJECT_ID
+      value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PROJECT_ID
+    - name: PRIVATE_KEY_ID
+      value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PRIVATE_KEY_ID
+    - name: PRIVATE_KEY
+      value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PRIVATE_KEY
+    - name: CLIENT_EMAIL
+      value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:CLIENT_EMAIL
+    - name: CLIENT_ID
+      value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:CLIENT_ID
+    - name: CLIENT_X509_CERT_URL
+      value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:CLIENT_X509_CERT_URL
+    - name: DATABASE_URL
+      value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:DATABASE_URL
+    - name: GEMINI_API_KEY
+      value-from: arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:GEMINI_API_KEY
