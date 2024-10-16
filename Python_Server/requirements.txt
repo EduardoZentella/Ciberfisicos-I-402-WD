@@ -3,6 +3,6 @@ waitress
 firebase-admin
 pydantic
 Pillow
-opencv-python
+python-dotenv
 numpy
 google-generativeai
