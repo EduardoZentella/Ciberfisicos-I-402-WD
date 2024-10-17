@@ -1,6 +1,6 @@
 # models/Models.py
 from pydantic import BaseModel, Field, RootModel
-from typing import Dict, Any
+from typing import Dict, List
 
 class Flujo(BaseModel):
     Flujo: float
@@ -54,3 +54,10 @@ class FirebaseConfig(BaseModel):
     token_uri: str
     auth_provider_x509_cert_url: str
     client_x509_cert_url: str
+
+class ImageRequest(BaseModel):
+    prompt: str
+    image_urls: List[str]
+
+class ContentRequest(BaseModel):
+    prompt: str

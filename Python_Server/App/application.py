@@ -1,7 +1,7 @@
 # app/app.py
 import firebase_admin
 import os
-from firebase_admin import credentials, db
+from firebase_admin import credentials, db, storage
 from dotenv import load_dotenv
 from flask import Flask
 from Models.models import FirebaseConfig
@@ -30,8 +30,11 @@ app = Flask(__name__)
 if not firebase_admin._apps:
     cred = credentials.Certificate(firebase_config.model_dump())
     firebase_admin.initialize_app(cred, {
-        'databaseURL': os.getenv("DATABASE_URL")
+        'databaseURL': os.getenv("DATABASE_URL"),
+        'storageBucket': os.getenv("STORAGE_URL")
     })
+    firebase_db = db
+    firebase_storage = storage 
 
 # Función para obtener solo el primer nivel de un diccionario
 def get_first_level(data):

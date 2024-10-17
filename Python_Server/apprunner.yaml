@@ -1,0 +1,34 @@
+﻿version: 1.0
+runtime: python311
+build:
+  commands:
+    build:
+      - pip3 install pipenv
+      - pipenv install --skip-lock --requirements requirements.txt
+    post-build:
+      - python3 -m unittest discover
+run:
+  runtime-version: 3.11
+  pre-run:
+    - pip3 install pipenv
+    - pipenv install --skip-lock --requirements requirements.txt
+  command: pipenv run python3 Server.py
+  network:
+    port: 8080
+  secrets:
+    - name: PROJECT_ID
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PROJECT_ID::"
+    - name: PRIVATE_KEY_ID
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PRIVATE_KEY_ID::"
+    - name: PRIVATE_KEY
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PRIVATE_KEY::"
+    - name: CLIENT_EMAIL
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:CLIENT_EMAIL::"
+    - name: CLIENT_ID
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:CLIENT_ID::"
+    - name: CLIENT_X509_CERT_URL
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:CLIENT_X509_CERT_URL::"
+    - name: DATABASE_URL
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:DATABASE_URL::"
+    - name: GEMINI_API_KEY
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:GEMINI_API_KEY::"
