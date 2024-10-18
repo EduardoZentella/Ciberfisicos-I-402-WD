@@ -39,10 +39,7 @@ def pivision():
                 print(e)
                 return jsonify(e.errors()), 400
             # Realizar la petición a PiVision
-            jsondata = {
-                "Name": data.body.get('Name'),
-                "Description": data.body.get('Description'),
-            }
+            jsondata = data.body
             response = requests.post(f'{base_url}/{data.path}', headers=headers, json=jsondata, verify=False)
         response.raise_for_status()
         # Verificar si la respuesta está vacía
