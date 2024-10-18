@@ -21,10 +21,20 @@ def login():
 def register():
     data = request.json
     try:
-        usuario = Usuarios.Usuario(**data)
+        usuario_data = {
+            "usuario": {
+                data['email']: {
+                    "contraseña": data['contraseña'],
+                    "nombre": data['nombre'],
+                    "unidades": data.get('unidades')
+                }
+            },
+            "admin": {}
+        }
+        usuario = Usuarios(**usuario_data)
     except ValidationError as e:
         return jsonify({"error": str(e)}), 400
 
     ref = firebase_db.reference('/usuarios/usuario')
-    ref.child(data.get('email')).set(usuario.dict())
-    return jsonify(usuario.dict()), 201
+    ref.child(data['email']).set(usuario.usuario[data['email']].model_dump())
+    return jsonify(usuario.usuario[data['email']].model_dump()), 201

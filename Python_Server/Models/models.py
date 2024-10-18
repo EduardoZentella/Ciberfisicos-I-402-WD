@@ -30,7 +30,7 @@ class Unidades(BaseModel):
 class Usuario(BaseModel):
     contraseña: str
     nombre: str
-    unidades: Unidades
+    unidades: Optional[Unidades] = None
     
 class Admin(BaseModel):
     contraseña: str
