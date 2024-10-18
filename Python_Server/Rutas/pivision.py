@@ -19,20 +19,25 @@ def pivision():
         'Authorization': f'Basic {token}',
         'Content-Type': 'application/json'
     }
-    try:
-        # Valida el JSON de entrada usando Pydantic
-        data = PiVisionRequest(**request.json)
-    except ValidationError as e:
-        print(e)
-        return jsonify(e.errors()), 400
-    
     if not base_url or not token:
         return jsonify({'error': 'PIVISION_URL or PIVISION_TOKEN not set'}), 500
+    
     try:
         if request.method == 'GET':
+            # Obtener el parámetro 'path' de la URL
+            path = request.args.get('RootPath')
+            path = path.replace('\\\\', '\\')
+            if not path:
+                return jsonify({'error': 'RootPath parameter is required'}), 400
             # Realizar la petición a PiVision
-            response = requests.get(f'{base_url}/{data.path}', headers=headers, verify=False)
+            response = requests.get(f'{base_url}/{path}', headers=headers, verify=False)
         elif request.method == 'POST':
+            try:
+                # Valida el JSON de entrada usando Pydantic
+                data = PiVisionRequest(**request.json)
+            except ValidationError as e:
+                print(e)
+                return jsonify(e.errors()), 400
             # Realizar la petición a PiVision
             jsondata = {
                 "Name": data.body.get('Name'),
