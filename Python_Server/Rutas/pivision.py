@@ -31,16 +31,25 @@ def pivision():
     try:
         if request.method == 'GET':
             # Realizar la petición a PiVision
-            print(f'{base_url}/{data.path}')
             response = requests.get(f'{base_url}/{data.path}', headers=headers, verify=False)
         elif request.method == 'POST':
             # Realizar la petición a PiVision
-            response = requests.post(f'{base_url}/{data.path}', headers=headers, json=data.body, verify=False)
+            jsondata = {
+                "Name": data.body.get('Name'),
+                "Description": data.body.get('Description'),
+            }
+            response = requests.post(f'{base_url}/{data.path}', headers=headers, json=jsondata, verify=False)
         response.raise_for_status()
-        return jsonify(response.json())
+        # Verificar si la respuesta está vacía
+        if response.text:
+            return jsonify(response.json())
+        else:
+            return jsonify({'message': 'Resource created successfully'}), 201
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 404:
             return jsonify({'error': str(e)}), 404
+        elif e.response.status_code == 409:
+            return jsonify({'error': str(e)}), 409
         return jsonify({'error': str(e)}), 500
     except requests.exceptions.RequestException as e:
         return jsonify({'error': str(e)}), 500
