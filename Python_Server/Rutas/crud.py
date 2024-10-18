@@ -85,10 +85,12 @@ def get_latest_flujo():
     if not unidades:
         return jsonify({"error": "Se necesita de al menos un unidad Id."}), 400
 
+    # Reemplazar los caracteres no deseados
+    unidades = unidades.replace('[', '').replace(']', '').replace('{', '').replace('}', '')
     unidades = [unidad.strip() for unidad in unidades.split(',')]
 
     latest_flujos = {}
-    
+
     for unidad in unidades:
         ref = firebase_db.reference(f'/usuarios/usuario/{email}/unidades/{unidad}/sensores/flujo/fechas')
         fechas = ref.get()
