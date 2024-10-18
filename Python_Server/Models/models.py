@@ -61,7 +61,7 @@ class ImageUpload(BaseModel):
 
 class PiVisionRequest(BaseModel):
     path: str
-    body: Optional[Dict[str, str]] = None
+    body: Optional[Dict[str, any]] = None
 
 class ImageRequest(BaseModel):
     prompt: str
