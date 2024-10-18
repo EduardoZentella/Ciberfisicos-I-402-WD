@@ -4,13 +4,13 @@ from App.application import app, db, get_first_level # Importar la aplicación d
 import datetime
 
 # Ruta para crear un nuevo recurso
-@app.route('/<path:path>', methods=['POST'])
+@app.route('/promedio/<path:path>', methods=['POST'])
 
 #request me da el startdate, lo agarro del request json, calculo el endate con la funcion con rectificar el formato, hacder un reference de fechas
 #me regresa un diccionario con las fechas, filtrar para que me de las fechas del rango y con eso tengo todos los paths 
 #guardarlo en flujo list los que vaya agarrando en esas fechas
 
-def create(path):
+def promedio(path):
     data = request.json
     ref = db.reference(f'/{path}')
     return jsonify(data), 201
@@ -27,15 +27,14 @@ def calculatePro():
                 break
         except ValueError:
             continue
-    
-match formatUsed:
-    case "%Y-%m-%d":
-        endDate = startDate + datetime.timedelta(days=1)
-    case "%Y-%m":
-        endDate = startDate + datetime.timedelta(days=30)
-    case "Y":
-        endDate = startDate + datetime.timedelta(days=365)
-endDate -= datetime.timedelta(milliseconds=1)
+    match formatUsed:
+        case "%Y-%m-%d":
+            endDate = startDate + datetime.timedelta(days=1)
+        case "%Y-%m":
+            endDate = startDate + datetime.timedelta(days=30)
+        case "Y":
+            endDate = startDate + datetime.timedelta(days=365)
+    endDate -= datetime.timedelta(milliseconds=1)
 
 
 
