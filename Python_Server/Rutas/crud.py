@@ -86,8 +86,8 @@ def get_latest_flujo():
         return jsonify({"error": "Se necesita de al menos un unidad Id."}), 400
 
     # Reemplazar los caracteres no deseados
-    unidades = unidades.replace('[', '').replace(']', '').replace('{', '').replace('}', '')
-    unidades = [unidad.strip() for unidad in unidades.split(',')]
+    unidades = unidades.replace('[', '').replace(']', '').replace('{', '').replace('}', '').replace('"', '')
+    unidades = [unidad.strip() for unidad in unidades.split(',') if unidad.strip()]
 
     latest_flujos = {}
 
