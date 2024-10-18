@@ -9,7 +9,7 @@ from flask import request, jsonify # Importar las librerías necesarias de Flask
 from App.application import app, firebase_db, firebase_storage, get_first_level # Importar la aplicación de Flask y la instancia de Firebase
 
 # Ruta para crear un nuevo recurso
-@app.route('/<path:path>', methods=['POST'])
+@app.route('/api/<path:path>', methods=['POST'])
 def create(path):
     data = request.json
     ref = firebase_db.reference(f'/{path}')
@@ -73,3 +73,28 @@ def upload_image():
     # Devuelve la URL de descarga de la imagen
     download_url = blob.generate_signed_url(timedelta(minutes=15))
     return jsonify({'download_url': download_url}), 201
+
+# Ruta para obtener los valores mas recientes de una unidad
+@app.route('/api/get_latest_flujo', methods=['GET'])
+def get_latest_flujo():
+    email = request.args.get('email')
+    unidad = request.args.get('unidad')
+    if not email:
+        return jsonify({"error": "Se necesita de un email."}), 400
+    if not unidad:
+        return jsonify({"error": "Se necesita de un unidad Id."}), 400
+
+    ref = firebase_db.reference(f'/usuarios/usuario/{email}/unidades/{unidad}/sensores/flujo/fechas')
+    fechas = ref.get()
+    
+    if not fechas:
+        return jsonify({"error": "Datos no encontrados."}), 404
+
+    latest_date = max(fechas.keys())
+    latest_hour = max(fechas[latest_date]['horas'].keys())
+    latest_minute = max(fechas[latest_date]['horas'][latest_hour]['minutos'].keys())
+    latest_second = max(fechas[latest_date]['horas'][latest_hour]['minutos'][latest_minute]['segundos'].keys())
+    
+    latest_flujo = fechas[latest_date]['horas'][latest_hour]['minutos'][latest_minute]['segundos'][latest_second]['Flujo']
+    
+    return jsonify({"latest_flujo": latest_flujo}), 200
