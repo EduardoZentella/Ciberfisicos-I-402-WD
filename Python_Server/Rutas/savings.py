@@ -1,39 +1,3 @@
-'''
-from flask import request, jsonify # Importar las librerías necesarias de Flask
-from App.application import app, db, get_first_level # Importar la aplicación de Flask y la instancia de Firebase
-import datetime
-
-# Ruta para crear un nuevo recurso
-@app.route('/<path:path>', methods=['POST'])
-def create(path):
-    data = request.json
-    ref = db.reference(f'/{path}')
-    return jsonify(data), 201
-
-def calculatePro():
-    data = request.json
-    startDate_str = data.get
-    startDate = datetime.datetime.now()
-    endDate = None
-    formats = ["%Y-%m-%d", "%Y-%m", "%Y"]
-    formatUsed = None
-    for fmt in formats:
-        try:
-            if fmt == startDate.strftime(format/fmt):
-                formatUsed = fmt
-                break
-        except ValueError:
-            continue
-    
-match formatUsed:
-    case "%Y-%m-%d":
-        endDate = startDate + datetime.timedelta(days=1)
-    case "%Y-%m":
-        endDate = startDate + datetime.timedelta(days=30)
-    case "Y":
-        endDate = startDate + datetime.timedelta(days=365)
-endDate -= datetime.timedelta(milliseconds=1)'''
-
 # Rutas/savings.py
 from flask import request, jsonify
 from App.application import app, db

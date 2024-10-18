@@ -1,6 +1,12 @@
 # Rutas/crud.py
+import base64
+from datetime import timedelta
+from pydantic import ValidationError
+from Models.models import ImageUpload # Importar el modelo de Pydantic
+from PIL import Image # Importar la librería para trabajar con imágenes
+from io import BytesIO # Importar la librería para trabajar con datos binarios
 from flask import request, jsonify # Importar las librerías necesarias de Flask
-from App.application import app, firebase_db, get_first_level # Importar la aplicación de Flask y la instancia de Firebase
+from App.application import app, firebase_db, firebase_storage, get_first_level # Importar la aplicación de Flask y la instancia de Firebase
 
 # Ruta para crear un nuevo recurso
 @app.route('/<path:path>', methods=['POST'])
@@ -41,3 +47,29 @@ def delete(path):
         return jsonify({"error": "Recurso no encontrado"}), 404
     ref.delete()
     return jsonify({"message": "Recurso eliminado"}), 200
+
+@app.route('/upload-image', methods=['POST'])
+def upload_image():
+    try:
+        # Valida el JSON de entrada usando Pydantic
+        data = ImageUpload(**request.json)
+    except ValidationError as e:
+        return jsonify(e.errors()), 400
+
+    # Decodifica la imagen base64
+    image_data = base64.b64decode(data.image)
+    image = Image.open(BytesIO(image_data))
+
+    # Guarda la imagen en un buffer
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG")
+    buffer.seek(0)
+
+    # Sube la imagen a Firebase Storage
+    bucket = firebase_storage.bucket()
+    blob = bucket.blob(data.path)
+    blob.upload_from_file(buffer, content_type="image/jpeg")
+
+    # Devuelve la URL de descarga de la imagen
+    download_url = blob.generate_signed_url(timedelta(minutes=15))
+    return jsonify({'download_url': download_url}), 201

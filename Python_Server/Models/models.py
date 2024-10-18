@@ -1,6 +1,6 @@
 # models/Models.py
-from pydantic import BaseModel, Field, RootModel
-from typing import Dict, List
+from pydantic import BaseModel, Field, RootModel, SkipValidation
+from typing import Dict, List, Optional
 
 class Flujo(BaseModel):
     Flujo: float
@@ -54,6 +54,16 @@ class FirebaseConfig(BaseModel):
     token_uri: str
     auth_provider_x509_cert_url: str
     client_x509_cert_url: str
+
+class ImageUpload(BaseModel):
+    path: str
+    image: str
+
+class PiVisionRequest(BaseModel):
+    path: str
+    body: Optional[Dict[str, SkipValidation]] = None
+    class Config:
+        arbitrary_types_allowed = True
 
 class ImageRequest(BaseModel):
     prompt: str

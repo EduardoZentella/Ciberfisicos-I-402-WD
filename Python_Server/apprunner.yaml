@@ -32,3 +32,7 @@ run:
       value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:DATABASE_URL::"
     - name: GEMINI_API_KEY
       value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:GEMINI_API_KEY::"
+    - name: PIVISION_URL
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PIVISION_URL::"
+    - name: PIVISION_TOKEN
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:PIVISION_TOKEN::"

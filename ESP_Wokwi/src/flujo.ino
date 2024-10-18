@@ -1,17 +1,19 @@
-#include <Arduino.h>
+// Autor: Equipo 5
+#include <ArduinoJSON.h>
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include <addons/TokenHelper.h>
-#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
 #include <ezTime.h>
 #include "FlowSensor.h"
 #include "QualitySensor.h"
+#include "PiVision.h"
 
 // Credenciales del proyecto Firebase
-#define FIREBASE_API_KEY <INSERT_API_KEY>
-#define FIREBASE_USER_EMAIL <INSERT_USER_EMAIL>
-#define FIREBASE_USER_PASSWORD <INSERT_USER_PASSWORD>
-#define FIREBASE_DB_URL <INSERT_DB_URL>
+#define FIREBASE_API_KEY "AIzaSyAIsw7vgI_9PC5RGmyU_ZEYY6XhOmnJqE0"
+#define FIREBASE_USER_EMAIL "a00835387@tec.mx"
+#define FIREBASE_USER_PASSWORD "ciberfisicosI5Admin"
+#define FIREBASE_DB_URL "https://ciberfisicos-i-402---equipo-5-default-rtdb.firebaseio.com"
 
 // Configuración de la red Wi-Fi
 #define WIFI_SSID "Wokwi-GUEST"
@@ -88,8 +90,9 @@ void setup() {
     Serial.println("Iniciando configuración...");
     conectarWiFi();
     sincronizarTiempo();
+    iniciarPiVisionAccount();
     inicializarFirebase();
-    inicializarSensores();
+    // inicializarSensores();
     Serial.println("Configuración completada.");
 }
 
@@ -102,7 +105,7 @@ void loop() {
 
     if (Firebase.ready() && !taskComplete) {
         unsigned long currentTime = millis();
-        measureFlow(currentTime);
+        // measureFlow(currentTime);
         // captureQualityData(currentTime);
     }
     else {
