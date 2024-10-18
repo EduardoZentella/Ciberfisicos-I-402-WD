@@ -1,6 +1,6 @@
 # Server.py
 from App.application import app
-from Rutas import crud, gemini, savings, pivision
+from Rutas import crud, gemini, savings, pivision, session
 
 if __name__ == '__main__':
     from waitress import serve

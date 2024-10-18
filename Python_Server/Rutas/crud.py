@@ -17,7 +17,7 @@ def create(path):
     return jsonify(data), 201
 
 # Ruta para obtener uno o todos los recursos
-@app.route('/<path:path>', methods=['GET'])
+@app.route('/api/<path:path>', methods=['GET'])
 def read(path):
     ref = firebase_db.reference(f'/{path}')
     instances = ref.get()    
@@ -28,7 +28,7 @@ def read(path):
     return jsonify(filtered_instances)
 
 # Ruta para actualizar un recurso por ID
-@app.route('/<path:path>', methods=['PUT'])
+@app.route('/api/<path:path>', methods=['PUT'])
 def update(path):
     data = request.json
     ref = firebase_db.reference(f'/{path}')
@@ -39,7 +39,7 @@ def update(path):
     return jsonify(data)
 
 # Ruta para eliminar un recurso por ID
-@app.route('/<path:path>', methods=['DELETE'])
+@app.route('/api/<path:path>', methods=['DELETE'])
 def delete(path):
     ref = firebase_db.reference(f'/{path}')
     instance = ref.get()
@@ -48,7 +48,7 @@ def delete(path):
     ref.delete()
     return jsonify({"message": "Recurso eliminado"}), 200
 
-@app.route('/upload-image', methods=['POST'])
+@app.route('/api/upload-image', methods=['POST'])
 def upload_image():
     try:
         # Valida el JSON de entrada usando Pydantic
