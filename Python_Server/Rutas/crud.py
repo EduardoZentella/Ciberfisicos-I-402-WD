@@ -74,27 +74,35 @@ def upload_image():
     download_url = blob.generate_signed_url(timedelta(minutes=15))
     return jsonify({'download_url': download_url}), 201
 
-# Ruta para obtener los valores mas recientes de una unidad
+# Ruta para obtener los valores más recientes de una o varias unidades
 @app.route('/api/get_latest_flujo', methods=['GET'])
 def get_latest_flujo():
     email = request.args.get('email')
-    unidad = request.args.get('unidad')
+    unidades = request.args.get('unidad')
+    
     if not email:
         return jsonify({"error": "Se necesita de un email."}), 400
-    if not unidad:
-        return jsonify({"error": "Se necesita de un unidad Id."}), 400
+    if not unidades:
+        return jsonify({"error": "Se necesita de al menos un unidad Id."}), 400
 
-    ref = firebase_db.reference(f'/usuarios/usuario/{email}/unidades/{unidad}/sensores/flujo/fechas')
-    fechas = ref.get()
-    
-    if not fechas:
-        return jsonify({"error": "Datos no encontrados."}), 404
+    unidades = [unidad.strip() for unidad in unidades.split(',')]
 
-    latest_date = max(fechas.keys())
-    latest_hour = max(fechas[latest_date]['horas'].keys())
-    latest_minute = max(fechas[latest_date]['horas'][latest_hour]['minutos'].keys())
-    latest_second = max(fechas[latest_date]['horas'][latest_hour]['minutos'][latest_minute]['segundos'].keys())
+    latest_flujos = {}
     
-    latest_flujo = fechas[latest_date]['horas'][latest_hour]['minutos'][latest_minute]['segundos'][latest_second]['Flujo']
+    for unidad in unidades:
+        ref = firebase_db.reference(f'/usuarios/usuario/{email}/unidades/{unidad}/sensores/flujo/fechas')
+        fechas = ref.get()
+        
+        if not fechas:
+            return jsonify({"error": f"Datos no encontrados para la unidad {unidad}."}), 404
+
+        latest_date = max(fechas.keys())
+        latest_hour = max(fechas[latest_date]['horas'].keys())
+        latest_minute = max(fechas[latest_date]['horas'][latest_hour]['minutos'].keys())
+        latest_second = max(fechas[latest_date]['horas'][latest_hour]['minutos'][latest_minute]['segundos'].keys())
+        
+        latest_flujo = fechas[latest_date]['horas'][latest_hour]['minutos'][latest_minute]['segundos'][latest_second]['Flujo']
+        
+        latest_flujos[unidad] = latest_flujo
     
-    return jsonify({"latest_flujo": latest_flujo}), 200
+    return jsonify({"latest_flujos": latest_flujos}), 200
