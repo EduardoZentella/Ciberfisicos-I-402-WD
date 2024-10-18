@@ -1,5 +1,5 @@
 # models/Models.py
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, Field, RootModel, SkipValidation
 from typing import Dict, List, Optional
 
 class Flujo(BaseModel):
@@ -61,7 +61,9 @@ class ImageUpload(BaseModel):
 
 class PiVisionRequest(BaseModel):
     path: str
-    body: Optional[Dict[str, any]] = None
+    body: Optional[Dict[str, SkipValidation]] = None
+    class Config:
+        arbitrary_types_allowed = True
 
 class ImageRequest(BaseModel):
     prompt: str
