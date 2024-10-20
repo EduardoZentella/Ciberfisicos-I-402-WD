@@ -84,7 +84,6 @@ def analyze_image_base64():
     # Convertir la imagen a un objeto de imagen de PIL
     image_bytes = BytesIO(decoded_image)
     image_pil = Image.open(image_bytes)
-    image_pil.show()
 
     # Generar contenido usando la API de Gemini
     prompt = "Hola! En la imagen, como ves la calidad del agua? Si es azul es de buena calidad, nublada es calidad baja y cafe o otro color es peligrosa."
