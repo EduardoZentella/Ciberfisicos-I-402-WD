@@ -30,6 +30,8 @@ run:
       value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:CLIENT_X509_CERT_URL::"
     - name: DATABASE_URL
       value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:DATABASE_URL::"
+    - name: STORAGE_URL
+      value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:STORAGE_URL::"
     - name: GEMINI_API_KEY
       value-from: "arn:aws:secretsmanager:us-east-2:886436937851:secret:Ciberfisicos-I-402-WD-Secret-61emZN:GEMINI_API_KEY::"
     - name: PIVISION_URL
