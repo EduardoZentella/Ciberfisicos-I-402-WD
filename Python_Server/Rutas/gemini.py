@@ -82,8 +82,7 @@ def analyze_image_base64():
         return jsonify({"error": "Formato de imagen no válido. msg: " + str(e)}), 400
     
     # Convertir la imagen a un objeto de imagen de PIL
-    image_np = np.frombuffer(decoded_image, np.uint8)
-    image_bytes = BytesIO(image_np)
+    image_bytes = BytesIO(decoded_image)
     image_pil = Image.open(image_bytes)
     image_pil.show()
 
@@ -151,9 +150,9 @@ def analyze_images_date():
         else:
             response = model.generate_content(files + [prompt])
         
-        results_by_unit[unidad] = response.text
-    
-    return jsonify(results_by_unit)
+        results_by_unit[unidad] = {'text': response.text}
+        
+        return jsonify({'unidades': results_by_unit})
     
 def obtener_imageUrls(email, startDate, endDate):
     ref = firebase_db.reference(f'/usuarios/usuario/{email}/unidades')
