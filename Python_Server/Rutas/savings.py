@@ -1,83 +1,105 @@
 # Rutas/savings.py
 from flask import request, jsonify
-from App.application import app, db
+from App.application import app, firebase_db, firebase_storage, get_first_level # Importar la aplicación de Flask y la instancia de Firebase
 import datetime
 
 # Ruta para calcular litros de agua
-@app.route('/calculate', methods=['POST'])
+@app.route('/api/calculate', methods=['GET'])
 def calculate():
-    data = request.json
-    startDate_str = data.get("startDate", "")
+    email = request.args.get('email')
 
-    formats = ["%Y-%m-%d", "%Y-%m", "%Y"]
-    formatUsed = None
-    startDate = None
+    if not email:
+        return jsonify({"error": "Se necesita de un email."}), 400
 
-    # Intentar convertir la fecha en los distintos formatos
-    for fmt in formats:
-        try:
-            startDate = datetime.datetime.strptime(startDate_str, fmt)
-            formatUsed = fmt
-            break
-        except ValueError:
-            continue
+    currentDate = datetime.datetime.now()
 
-    if not formatUsed:
-        return jsonify({"error": "Formato de fecha no válido"}), 400
+    total_litros_dia = calcular_por_dia(currentDate, email)
+    total_litros_semana = calcular_por_semana(currentDate, email)
+    total_litros_mes = calcular_por_mes(currentDate, email)
 
-    # Determinar la función a usar según el formato
-    if formatUsed == "%Y-%m-%d":
-        total_litros = calcular_por_dia(startDate)
-    elif formatUsed == "%Y-%m":
-        total_litros = calcular_por_mes(startDate)
-    elif formatUsed == "%Y":
-        total_litros = calcular_por_anio(startDate)
-
-    return jsonify({"total_litros": total_litros}), 200
+    return jsonify({
+        "total_litros_dia": total_litros_dia,
+        "total_litros_semana": total_litros_semana,
+        "total_litros_mes": total_litros_mes
+    }), 200
 
 
-def calcular_por_dia(startDate):
-    # Calcular el rango para un día
-    endDate = startDate + datetime.timedelta(days=1) - datetime.timedelta(milliseconds=1)
+def calcular_por_dia(diaActual, email):
+    # Calcular el rango para el día actual
+    startDate = diaActual.replace(hour=0, minute=0, second=0, microsecond=0)
+    endDate = diaActual.replace(hour=23, minute=59, second=59, microsecond=999999)
     
     # Obtener datos de Firebase para el día
-    ref = db.reference('/flujo_agua')
-    flujo_list = ref.order_by_key().start_at(startDate.isoformat()).end_at(endDate.isoformat()).get()
+    ref = firebase_db.reference(f'/usuarios/usuario/{email}/unidades')
+    unidades = ref.get()
 
-    # Sumar la cantidad de litros
-    total_litros = sum(item['litros'] for item in flujo_list.values() if 'litros' in item)
+    total_litros = 0
+    for unidad_id, unidad_data in unidades.items():
+        flujo_ref = unidad_data['sensores']['flujo']['fechas']
+        flujo_list = {date: horas for date, horas in flujo_ref.items() if startDate.date().isoformat() <= date <= endDate.date().isoformat()}
+
+        # Sumar la cantidad de litros
+        for date, horas in flujo_list.items():
+            if not horas:
+                continue
+            for hour, minutos in horas['horas'].items():
+                for minute, segundos in minutos['minutos'].items():
+                    for second, data in segundos['segundos'].items():
+                        if 'Flujo' in data:
+                            total_litros += data['Flujo']
     
-    return total_litros
+    return round(total_litros, 2)
 
 
-def calcular_por_mes(startDate):
-    # Calcular el rango para un mes
-    endDate = startDate + datetime.timedelta(days=30) - datetime.timedelta(milliseconds=1)
+def calcular_por_semana(diaActual, email):
+    # Calcular el rango para la semana actual
+    startDate = diaActual - datetime.timedelta(days=diaActual.weekday())
+    startDate = startDate.replace(hour=0, minute=0, second=0, microsecond=0)
+    endDate = startDate + datetime.timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
+
+    # Obtener datos de Firebase para la semana
+    ref = firebase_db.reference(f'/usuarios/usuario/{email}/unidades')
+    unidades = ref.get()
+
+    total_litros = 0
+    for unidad_id, unidad_data in unidades.items():
+        flujo_ref = unidad_data['sensores']['flujo']['fechas']
+        flujo_list = {date: horas for date, horas in flujo_ref.items() if startDate.date().isoformat() <= date <= endDate.date().isoformat()}
+
+        # Sumar la cantidad de litros
+        for date, horas in flujo_list.items():
+            if not horas:
+                continue
+            for hour, minutos in horas['horas'].items():
+                for minute, segundos in minutos['minutos'].items():
+                    for second, data in segundos['segundos'].items():
+                        if 'Flujo' in data:
+                            total_litros += data['Flujo']
+    
+    return round(total_litros, 2)
+
+def calcular_por_mes(diaActual, email):
+    # Calcular el rango para el mes actual
+    startDate = diaActual.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    endDate = (startDate + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(milliseconds=1)
 
     # Obtener datos de Firebase para el mes
-    ref = db.reference('/flujo_agua')
-    flujo_list = ref.order_by_key().start_at(startDate.isoformat()).end_at(endDate.isoformat()).get()
+    ref = firebase_db.reference(f'/usuarios/usuario/{email}/unidades')
+    unidades = ref.get()
 
-    # Sumar la cantidad de litros
-    total_litros = sum(item['litros'] for item in flujo_list.values() if 'litros' in item)
+    total_litros = 0
+    for unidad_id, unidad_data in unidades.items():
+        flujo_ref = unidad_data['sensores']['flujo']['fechas']
+        flujo_list = {date: horas for date, horas in flujo_ref.items() if startDate.date().isoformat() <= date <= endDate.date().isoformat()}
 
-    return total_litros
-
-
-def calcular_por_anio(startDate):
-    # Calcular el rango para un año
-    endDate = startDate + datetime.timedelta(days=365) - datetime.timedelta(milliseconds=1)
-
-    # Obtener datos de Firebase para el año
-    ref = db.reference('/flujo_agua')
-    flujo_list = ref.order_by_key().start_at(startDate.isoformat()).end_at(endDate.isoformat()).get()
-
-    # Sumar la cantidad de litros
-    total_litros = sum(item['litros'] for item in flujo_list.values() if 'litros' in item)
-
-    return total_litros
-
-
-#request me da el startdate, lo agarro del request json, calculo el endate con la funcion con rectificar el formato, hacder un reference de fechas
-#me regresa un diccionario con las fechas, filtrar para que me de las fechas del rango y con eso tengo todos los paths 
-#guardarlo en flujo list los que vaya agarrando en esas fechas
+        # Sumar la cantidad de litros
+        for date, horas in flujo_list.items():
+            if not horas:
+                continue
+            for hour, minutos in horas['horas'].items():
+                for minute, segundos in minutos['minutos'].items():
+                    for second, data in segundos['segundos'].items():
+                        if 'Flujo' in data:
+                            total_litros += data['Flujo']
+    
+    return round(total_litros, 2)

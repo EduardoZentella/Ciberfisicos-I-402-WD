@@ -2,9 +2,16 @@
 #include <Firebase_ESP_Client.h>
 #include "FlowSensor.h"
 #include <ezTime.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
+#define AWS_PythonServer <TU_SERVIDOR_PYTHON>
 
 // Declarar myTZ como externa
 extern Timezone myTZ;
+
+// Declarar http
+HTTPClient http;
 
 // Inicializamos la funcion PulseGen
 void pulseGen(int pulseTime);
@@ -14,12 +21,15 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 volatile int flow_frequency; // Mide los pulsos del sensor de flujo
 float vol = 0.0, l_minute;
-unsigned char flowsensor = 2; // Pin de entrada del sensor de flujo
 unsigned long cloopTime;
 unsigned long currentTime;
-
-int pulsePin = 4;
 unsigned long previousTime = 0;
+// Pines del sensor flujo
+unsigned int flowsensor = 2; // Pin de entrada del sensor de flujo
+unsigned int pulsePin = 4;
+// Pines de los LEDs
+unsigned int LedVerde = 9;
+unsigned int LedRojo = 10;
 
 // Función de interrupción para contar los pulsos del sensor de flujo
 void IRAM_ATTR flow() {
@@ -30,6 +40,8 @@ void initFlowSensor() {
   pinMode(pulsePin, OUTPUT);
   pinMode(flowsensor, INPUT);
   digitalWrite(flowsensor, HIGH); // Pull-Up interno opcional
+  pinMode(LedVerde, OUTPUT);
+  pinMode(LedRojo, OUTPUT);
 
   // Inicializa la pantalla LCD
   lcd.init(21, 22);
@@ -48,6 +60,7 @@ void initFlowSensor() {
 void calcularFlujo();
 void mostrarEnLCD();
 void guardarEnFirebase();
+void guardarEnPiVision();
 void mostrarFlujoCero();
 
 void measureFlow(unsigned long currentTime) {
@@ -62,6 +75,7 @@ void measureFlow(unsigned long currentTime) {
       calcularFlujo();
       mostrarEnLCD();
       guardarEnFirebase();
+      guardarEnPiVision();
     } else {
       mostrarFlujoCero();
     }
@@ -123,8 +137,10 @@ void guardarEnFirebase() {
         Serial.println("Guardando datos en Firebase...");
         if (Firebase.RTDB.setJSON(&fbdo, basePath.c_str(), &jsonFlujo)) {
           Serial.println("Datos guardados correctamente en Firebase");
+          digitalWrite(LedVerde, HIGH);
         } else {
           String errorMsg = "Error al guardar datos en Firebase: ";
+          digitalWrite(LedRojo, HIGH);
           errorMsg += fbdo.errorReason();
           Serial.println(errorMsg);
         }
@@ -159,5 +175,33 @@ void pulseGen(int pulseTime) {
     digitalWrite(pulsePin, LOW);
     delay(pulseTime);
     previousTime = currentTime;
+  }
+}
+
+
+void guardarEnPiVision(){
+  http.begin(AWS_PythonServer);
+  http.addHeader("Content-Type", "application/json");
+  // Crear el cuerpo de la solicitud POST
+    StaticJsonDocument<200> doc;
+    String path = "streams/";
+    path.concat(point_webIdStr);
+    path.concat("/value");
+    doc["path"] = path;
+    Serial.printf("Subiendo en punto en la ruta: %s\n", path.c_str());
+    JsonObject body = doc.createNestedObject("body");
+    body["Value"] = l_minute;
+
+    String requestBody;
+    serializeJson(doc, requestBody);
+
+  int httpCode = http.POST(requestBody);
+  if (httpCode > 0) {
+    Serial.printf("Código de respuesta: %d\n", httpCode);
+    if (httpCode == HTTP_CODE_OK) {
+      String payload = http.getString();
+    }
+  } else {
+    Serial.printf("Error al subir punto: %s\n", http.errorToString(httpCode).c_str());
   }
 }

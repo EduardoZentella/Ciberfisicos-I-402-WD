@@ -1,26 +1,24 @@
 // Autor: Equipo 5
-#include <ArduinoJSON.h>
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 #include <addons/TokenHelper.h>
-#include <HTTPClient.h>
 #include <ezTime.h>
 #include "FlowSensor.h"
 #include "QualitySensor.h"
 #include "PiVision.h"
 
 // Credenciales del proyecto Firebase
-#define FIREBASE_API_KEY "AIzaSyAIsw7vgI_9PC5RGmyU_ZEYY6XhOmnJqE0"
-#define FIREBASE_USER_EMAIL "a00835387@tec.mx"
-#define FIREBASE_USER_PASSWORD "ciberfisicosI5Admin"
-#define FIREBASE_DB_URL "https://ciberfisicos-i-402---equipo-5-default-rtdb.firebaseio.com"
+#define FIREBASE_API_KEY <TU_API_KEY>
+#define FIREBASE_USER_EMAIL <TU_CORREO>
+#define FIREBASE_USER_PASSWORD <TU_CONTRASEÑA>
+#define FIREBASE_DB_URL <TU_URL_DE_BASE_DE_DATOS>
 
 // Configuración de la red Wi-Fi
 #define WIFI_SSID "Wokwi-GUEST"
 #define WIFI_PASSWORD ""
 #define WIFI_CHANNEL 6
 
-const char *USER_EMAIL = "test";
+const char *USER_EMAIL = "test_890";
 const char *SENSOR_ID = "Unidad-1";
 
 // Configuración de EzTime
@@ -36,7 +34,7 @@ bool taskComplete = false;
 void inicializarSensores() {
     Serial.println("Inicializando sensores...");
     initFlowSensor();
-    // initQualitySensor();
+    //initQualitySensor();
 }
 
 void conectarWiFi() {
@@ -92,7 +90,7 @@ void setup() {
     sincronizarTiempo();
     iniciarPiVisionAccount();
     inicializarFirebase();
-    // inicializarSensores();
+    inicializarSensores();
     Serial.println("Configuración completada.");
 }
 
@@ -105,10 +103,9 @@ void loop() {
 
     if (Firebase.ready() && !taskComplete) {
         unsigned long currentTime = millis();
-        // measureFlow(currentTime);
-        // captureQualityData(currentTime);
-    }
-    else {
+        measureFlow(currentTime);
+        //captureQualityData(currentTime);
+    } else {
         Serial.println("Esperando a que Firebase esté listo...");
         taskComplete = true;
     }

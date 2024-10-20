@@ -9,6 +9,7 @@ extern FirebaseAuth auth;
 extern FirebaseConfig configF;
 extern const char *USER_EMAIL;
 extern const char *SENSOR_ID;
+extern String point_webIdStr;
 
 void initFlowSensor();
 void measureFlow(unsigned long currentTime);
