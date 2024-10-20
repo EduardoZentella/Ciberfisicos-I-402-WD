@@ -108,3 +108,34 @@ def get_latest_flujo():
         latest_flujos[unidad] = latest_flujo
     
     return jsonify({"latest_flujos": latest_flujos}), 200
+
+# Diccionario global para almacenar el estado del flujo por usuario
+flujo_status = {}
+
+# Ruta para actualizar el estado del flujo por usuario
+@app.route('/api/update_flujo_status', methods=['POST'])
+def update_flujo_status():
+    email = request.args.get('email')
+    data = request.json
+
+    if not email or 'flujo' not in data:
+        return jsonify({"error": "Se necesita el email y el estado del flujo."}), 400
+
+    if not isinstance(data['flujo'], bool):
+        return jsonify({"error": "El estado del flujo debe ser true o false."}), 400
+
+    flujo_status[email] = 1 if data['flujo'] else 0
+    return jsonify({"message": "Estado del flujo actualizado."}), 200
+
+# Ruta para obtener el estado actual del flujo por usuario
+@app.route('/api/get_flujo_status', methods=['GET'])
+def get_flujo_status():
+    email = request.args.get('email')
+    
+    if not email:
+        return jsonify({"error": "Se necesita el email."}), 400
+
+    if email not in flujo_status:
+        return jsonify({"error": "Estado del flujo no encontrado para el email proporcionado."}), 404
+
+    return jsonify({"flujo_status": flujo_status[email]}), 200

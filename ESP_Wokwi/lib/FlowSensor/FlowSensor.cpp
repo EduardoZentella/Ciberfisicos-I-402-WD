@@ -5,7 +5,7 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-#define AWS_PythonServer <TU_SERVIDOR_PYTHON>
+#define AWS_PythonServer <URL del servidor de Python>
 
 // Declarar myTZ como externa
 extern Timezone myTZ;
@@ -74,10 +74,16 @@ void measureFlow(unsigned long currentTime) {
     if (flow_frequency != 0) {
       calcularFlujo();
       mostrarEnLCD();
+      digitalWrite(LedRojo, LOW);
+      digitalWrite(LedVerde, HIGH);
+      actualizar_flujo(true);
       guardarEnFirebase();
       guardarEnPiVision();
     } else {
       mostrarFlujoCero();
+      digitalWrite(LedVerde, LOW);
+      digitalWrite(LedRojo, HIGH);
+      actualizar_flujo(false);
     }
   }
 }
@@ -137,7 +143,6 @@ void guardarEnFirebase() {
         Serial.println("Guardando datos en Firebase...");
         if (Firebase.RTDB.setJSON(&fbdo, basePath.c_str(), &jsonFlujo)) {
           Serial.println("Datos guardados correctamente en Firebase");
-          digitalWrite(LedVerde, HIGH);
         } else {
           String errorMsg = "Error al guardar datos en Firebase: ";
           digitalWrite(LedRojo, HIGH);
@@ -204,4 +209,32 @@ void guardarEnPiVision(){
   } else {
     Serial.printf("Error al subir punto: %s\n", http.errorToString(httpCode).c_str());
   }
+}
+
+void actualizar_flujo(bool estado_flujo){
+  String baseUrl = String(AWS_PythonServer);
+      int index = baseUrl.indexOf("/pivision");
+      String url = baseUrl.substring(0, index);
+      url.concat("/api/update_flujo_status?email=");
+      url.concat(USER_EMAIL);
+      http.begin(url);
+      http.addHeader("Content-Type", "application/json");
+
+      // Crear el cuerpo de la solicitud POST
+      StaticJsonDocument<200> doc;
+      doc["flujo"] = estado_flujo;
+
+      String requestBody;
+      serializeJson(doc, requestBody);
+
+      int httpCode = http.POST(requestBody);
+      if (httpCode > 0) {
+        Serial.printf("Código de respuesta: %d\n", httpCode);
+        if (httpCode == HTTP_CODE_OK) {
+          String payload = http.getString();
+          Serial.println(payload);
+        }
+      } else {
+        Serial.printf("Error al subir punto: %s\n", http.errorToString(httpCode).c_str());
+      }
 }
