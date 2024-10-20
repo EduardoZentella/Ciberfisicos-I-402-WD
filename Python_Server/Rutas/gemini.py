@@ -68,21 +68,23 @@ def generate_content():
         return jsonify({'error': 'No se pudo generar contenido'}), 500
     
 # Ruta para analizar imágen por Base64 string
-@app.route('/ai/analyze-images/base64', methods=['GET'])
+@app.route('/ai/analyze-images/base64', methods=['POST'])
 def analyze_image_base64():
-    image64_str = request.args.get('image64')
-
-    if not image64_str:
-        return jsonify({"error": "Se necesita una imagen en base64."}), 400
+    try:
+        data = request.json
+        image64_str = data['image64']
+    except (KeyError, TypeError):
+        return jsonify({"error": "Se necesita una imagen en base64 en el formato adecuado."}), 400
 
     # Verificar que la cadena sea un formato base64 válido
     try:
-        decoded_image = base64.urlsafe_b64decode(image64_str + '=' * (4 - len(image64_str) % 4))
+        decoded_image = base64.b64decode(image64_str + '=' * (4 - len(image64_str) % 4))
     except Exception as e:
         return jsonify({"error": "Formato de imagen no válido. msg: " + str(e)}), 400
     
     # Convertir la imagen a un objeto de imagen de PIL
-    image_bytes = BytesIO(decoded_image)
+    image_arr = np.frombuffer(decoded_image, np.uint8)
+    image_bytes = BytesIO(image_arr)
     image_pil = Image.open(image_bytes)
 
     # Generar contenido usando la API de Gemini
